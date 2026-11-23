@@ -87,9 +87,9 @@ def main():
         torch_dtype=torch.float32,
         low_cpu_mem_usage=True,
     )
-    
-    
-    model.config.use_cache = False 
+
+
+    model.config.use_cache = False
 
     if added_pad:
         old_n = model.get_input_embeddings().num_embeddings
@@ -151,7 +151,7 @@ def main():
     data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer,
         mlm=False,
-        pad_to_multiple_of=8, 
+        pad_to_multiple_of=8,
         return_tensors="pt",
     )
 
@@ -166,11 +166,11 @@ def main():
         per_device_eval_batch_size=max(1, args.batch_size * 2),
         gradient_accumulation_steps=args.gradient_accumulation_steps,
 
-        
+
 
         learning_rate=args.learning_rate,
         weight_decay=args.weight_decay,
-        warmup_steps=max(10, steps_per_epoch // 2), 
+        warmup_steps=max(10, steps_per_epoch // 2),
         lr_scheduler_type="cosine",
         eval_strategy="steps",
         eval_steps=1000,
@@ -190,7 +190,7 @@ def main():
         remove_unused_columns=False,
         dataloader_pin_memory=False,
         optim="adamw_torch",
-        group_by_length=False, 
+        group_by_length=False,
         max_grad_norm=args.max_grad_norm,
         seed=42,
         logging_nan_inf_filter=True,

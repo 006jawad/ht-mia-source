@@ -24,7 +24,7 @@ def get_gpu_count():
 
 def create_accelerate_config():
     gpu_count = get_gpu_count()
-    
+
     if gpu_count == 0:
         print("No GPUs detected. Creating CPU config...")
         config_content = """compute_environment: LOCAL_MACHINE
@@ -78,14 +78,14 @@ tpu_use_cluster: false
 tpu_use_sudo: false
 use_cpu: false
 """
-    
+
     config_dir = Path.home() / ".cache" / "huggingface" / "accelerate"
     config_dir.mkdir(parents=True, exist_ok=True)
-    
+
     config_file = config_dir / "default_config.yaml"
     with open(config_file, 'w') as f:
         f.write(config_content)
-    
+
     print(f"Accelerate config written to: {config_file}")
     return config_file
 
@@ -102,7 +102,7 @@ def main():
     print(f"Detected {gpu_count} GPU(s)")
 
     config_file = Path.home() / ".cache" / "huggingface" / "accelerate" / "default_config.yaml"
-    
+
     if config_file.exists():
         print(f"Existing accelerate config found: {config_file}")
         response = input("Do you want to recreate it? (y/n): ").lower()
@@ -111,16 +111,16 @@ def main():
             return
 
     create_accelerate_config()
-    
+
     print("\nAccelerate setup complete!")
     print("\nUsage examples:")
     print("=" * 30)
-    
+
     if gpu_count == 0:
         print("# CPU training")
         print("python run_mediqa_pipeline.py --single_gpu --format simple")
     elif gpu_count == 1:
-        print("# Single GPU training")  
+        print("# Single GPU training")
         print("python run_mediqa_pipeline.py --single_gpu --format simple")
         print("\n# Or with accelerate (same result for 1 GPU)")
         print("python run_mediqa_pipeline.py --format simple")

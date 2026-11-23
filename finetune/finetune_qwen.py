@@ -91,7 +91,7 @@ def main():
     )
 
 
-    model.config.use_cache = False 
+    model.config.use_cache = False
 
     if added_pad:
         old_n = model.get_input_embeddings().num_embeddings
@@ -182,8 +182,8 @@ def main():
         logging_steps=10,
         logging_strategy="steps",
         report_to=None,
-        bf16=True,                    
-        fp16=False,                 
+        bf16=True,
+        fp16=False,
         gradient_checkpointing=True,
         optim="adamw_torch",
         group_by_length=False,

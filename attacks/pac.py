@@ -97,17 +97,17 @@ class PACAttack(AbstractAttack):
         return dataset
 
     def pac_score(self, x):
-        text = x["text"]		
+        text = x["text"]
         tokenized = self.tokenizer(text, return_tensors="pt")
         input_ids = tokenized.input_ids.to(self.device)
         attention_mask = tokenized.attention_mask.to(self.device)
-        
+
         og_dist = polarized_distance(
-        	model=self.model, 
-        	token_ids=input_ids, 
-        	attention_mask=attention_mask, 
-        	k_min=self.config['k_min'], 
-        	k_max=self.config['k_max']
+            model=self.model,
+            token_ids=input_ids,
+            attention_mask=attention_mask,
+            k_min=self.config['k_min'],
+            k_max=self.config['k_max']
         )
 
         adjacent = eda(text, alpha=self.config['alpha'], num_aug=self.config['num_augmentations'])
@@ -115,11 +115,11 @@ class PACAttack(AbstractAttack):
         input_ids = tokenized.input_ids.to(self.device)
         attention_mask = tokenized.attention_mask.to(self.device)
         adjacent_dist = polarized_distance(
-        	model=self.model, 
-        	token_ids=input_ids, 
-        	attention_mask=attention_mask, 
-        	k_min=self.config['k_min'], 
-        	k_max=self.config['k_max']
+            model=self.model,
+            token_ids=input_ids,
+            attention_mask=attention_mask,
+            k_min=self.config['k_min'],
+            k_max=self.config['k_max']
         )
 
         score = og_dist[0] - np.mean(adjacent_dist)

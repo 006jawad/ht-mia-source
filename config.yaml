@@ -64,8 +64,8 @@ wbc:
 ht_mia:
   module: ht_mia
   base_model_name: "Qwen/Qwen3-0.6B-Base" # Update this path
-  base_device: "cuda:1"  
-  min_k: 20 
+  base_device: "cuda:1"
+  min_k: 20
   max_k: 30
   threshold: 0.5
   max_length: 512

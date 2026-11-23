@@ -3,7 +3,7 @@ LLaMA 3 Medical Training Script (8B / 70B scaling)
 - Compatible with: meta-llama/Llama-3.1-8B, Llama-3.1-70B,
                    meta-llama/Llama-3.3-70B, Llama-3.2-3B, etc.
 - device_map="auto", gradient checkpointing, 8-bit optimizer
-- For Llama-3.2-1B, see finetune_llama.py instead  
+- For Llama-3.2-1B, see finetune_llama.py instead
 """
 
 import os

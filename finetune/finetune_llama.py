@@ -33,18 +33,18 @@ def tokenize_function(examples, tokenizer, max_length=512):
     )
 
     tokenized["labels"] = tokenized["input_ids"].copy()
-    
+
     tokenized["labels"] = [
         [-100 if token == tokenizer.pad_token_id else token for token in labels]
         for labels in tokenized["labels"]
     ]
-    
+
     if "attention_mask" not in tokenized:
         tokenized["attention_mask"] = [
             [1 if token != tokenizer.pad_token_id else 0 for token in input_ids]
             for input_ids in tokenized["input_ids"]
         ]
-    
+
     return tokenized
 
 def main():
@@ -71,8 +71,8 @@ def main():
     print(f"[Rank {local_rank}] Starting with Llama-3.2-1B...")
 
     tokenizer = AutoTokenizer.from_pretrained(
-        args.model_name, 
-        trust_remote_code=True, 
+        args.model_name,
+        trust_remote_code=True,
         use_fast=True
     )
 
@@ -85,7 +85,7 @@ def main():
     elif args.use_fp16:
         dtype = torch.float16
         print(f"[Rank {local_rank}] Using float16 precision")
-    
+
     model = AutoModelForCausalLM.from_pretrained(
         args.model_name,
         trust_remote_code=True,
@@ -102,7 +102,7 @@ def main():
     model.config.pad_token_id = tokenizer.pad_token_id
 
     model.config.use_cache = False
-    
+
     if local_rank == 0:
         print(f"[Rank 0] Using pad_token: {tokenizer.pad_token} (id: {tokenizer.pad_token_id})")
         print(f"[Rank 0] Using eos_token: {tokenizer.eos_token} (id: {tokenizer.eos_token_id})")
@@ -193,7 +193,7 @@ def main():
                             control.should_training_stop = True
 
     model.gradient_checkpointing_enable()
-    
+
     trainer = Trainer(
         model=model,
         args=training_args,
@@ -206,7 +206,7 @@ def main():
     if local_rank == 0:
         print("[Rank 0] Starting training...")
         print(f"[Rank 0] Total training steps: {steps_per_epoch * args.epochs}")
-        
+
     trainer.train()
 
     if local_rank == 0:

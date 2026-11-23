@@ -17,37 +17,37 @@ class MedicalDataProcessor:
             'asclepius': self.process_asclepius,
             'clinicalnotes': self.process_clinicalnotes,
         }
-    
+
     def load_dataset_by_name(self, dataset_name: str):
         print(f"Loading {dataset_name} dataset...")
-        
+
         if dataset_name == 'asclepius':
             return load_dataset("starmpcc/Asclepius-Synthetic-Clinical-Notes", trust_remote_code=True)
         elif dataset_name == 'clinicalnotes':
             return load_dataset("AGBonnet/augmented-clinical-notes", trust_remote_code=True)
         else:
             raise ValueError(f"Unsupported dataset: {dataset_name}. Available: {list(self.supported_datasets.keys())}")
-    
-    
+
+
     def process_asclepius(self, dataset, use_all_splits: bool = True) -> List[Dict]:
         qa_pairs = []
         splits_to_process = ['train', 'validation', 'test'] if use_all_splits else ['train']
-        
+
         for split_name in splits_to_process:
             if split_name not in dataset:
                 continue
-                
+
             print(f"Processing Asclepius {split_name}...")
             split_data = dataset[split_name]
-            
+
             for idx, example in enumerate(split_data):
                 if idx < 3:
                     print(f"Example {idx} fields: {list(example.keys())}")
-                
+
                 note = example.get('note', '').strip()
                 question = example.get('question', '').strip()
                 answer = example.get('answer', '').strip()
-                
+
                 if note and question and answer:
                     formatted_question = f"Clinical Note: {note[:300]}...\nQuestion: {question}"
                     formatted_answer = answer
@@ -57,10 +57,10 @@ class MedicalDataProcessor:
                     formatted_answer = '. '.join(sentences[1:3]) if len(sentences) > 1 else "Clinical analysis completed."
                 else:
                     continue
-                
+
                 if len(formatted_answer) > self.max_answer_length:
                     formatted_answer = formatted_answer[:self.max_answer_length] + "..."
-                
+
                 qa_pairs.append({
                     'question': formatted_question,
                     'answer': formatted_answer,
@@ -70,21 +70,21 @@ class MedicalDataProcessor:
                         'example_id': idx
                     }
                 })
-        
+
         return qa_pairs
-    
-    
+
+
     def process_clinicalnotes(self, dataset, use_all_splits: bool = True) -> List[Dict]:
         qa_pairs = []
         splits_to_process = ['train', 'validation', 'test'] if use_all_splits else ['train']
-        
+
         for split_name in splits_to_process:
             if split_name not in dataset:
                 continue
-                
+
             print(f"Processing Clinical Notes {split_name}...")
             split_data = dataset[split_name]
-            
+
             for idx, example in enumerate(split_data):
                 if idx < 3:
                     print(f"  Example {idx} fields: {list(example.keys())}")
@@ -96,15 +96,15 @@ class MedicalDataProcessor:
                     note_text = example['clinical_note']
                 elif 'text' in example:
                     note_text = example['text']
-                
+
                 if note_text and len(note_text.split()) >= 10:
                     sentences = note_text.split('.')
                     question = f"Analyze this clinical note: {sentences[0]}..."
                     answer = '. '.join(sentences[1:3]) if len(sentences) > 1 else "Clinical analysis completed."
-                    
+
                     if len(answer) > self.max_answer_length:
                         answer = answer[:self.max_answer_length] + "..."
-                    
+
                     qa_pairs.append({
                         'question': question,
                         'answer': answer,
@@ -114,15 +114,15 @@ class MedicalDataProcessor:
                             'example_id': idx
                         }
                     })
-        
+
         return qa_pairs
 
 
-    
+
     def process_dataset(self, dataset_name: str, use_all_splits: bool = True) -> List[Dict]:
         if dataset_name not in self.supported_datasets:
             raise ValueError(f"Unsupported dataset: {dataset_name}")
-        
+
         dataset = self.load_dataset_by_name(dataset_name)
         return self.supported_datasets[dataset_name](dataset, use_all_splits)
 
@@ -144,20 +144,20 @@ def format_chat(question: str, answer: str) -> str:
 def format_conversation(question: str, answer: str) -> str:
     return f"<|im_start|>user\n{question.strip()}<|im_end|>\n<|im_start|>assistant\n{answer.strip()}<|im_end|>"
 
-def create_formatted_dataset(qa_pairs: List[Dict], 
+def create_formatted_dataset(qa_pairs: List[Dict],
                            format_type: str = "simple",
                            train_split_ratio: float = 0.5) -> Tuple[Dataset, Dataset]:
-    
+
     format_functions = {
         "simple": format_simple,
         "instruction": format_instruction,
         "chat": format_chat,
         "conversation": format_conversation
     }
-    
+
     if format_type not in format_functions:
         raise ValueError(f"format_type must be one of {list(format_functions.keys())}")
-    
+
     format_fn = format_functions[format_type]
 
     formatted_texts = []
@@ -176,7 +176,7 @@ def create_formatted_dataset(qa_pairs: List[Dict],
 
     train_dataset = Dataset.from_list(train_data)
     val_dataset = Dataset.from_list(val_data)
-    
+
     return train_dataset, val_dataset
 
 def save_dataset(dataset: Dataset, filepath: str):
@@ -191,74 +191,74 @@ def save_jsonl(dataset: Dataset, filepath: str):
 
 def main():
     parser = argparse.ArgumentParser(description="Prepare medical datasets for fine-tuning")
-    parser.add_argument("--dataset", 
+    parser.add_argument("--dataset",
                        choices=['asclepius', 'clinicalnotes', 'all'],
-                       default="clinicalnotes", 
+                       default="clinicalnotes",
                        help="Dataset to process ('all' for all available datasets)")
-    parser.add_argument("--format", 
-                       choices=["simple", "instruction", "chat", "conversation"], 
-                       default="simple", 
+    parser.add_argument("--format",
+                       choices=["simple", "instruction", "chat", "conversation"],
+                       default="simple",
                        help="Text formatting style")
-    parser.add_argument("--output_dir", 
-                       default="./medical_processed", 
+    parser.add_argument("--output_dir",
+                       default="./medical_processed",
                        help="Output directory for processed datasets")
-    parser.add_argument("--max_answer_length", 
-                       type=int, default=1024, 
+    parser.add_argument("--max_answer_length",
+                       type=int, default=1024,
                        help="Maximum answer length in characters")
-    parser.add_argument("--train_ratio", 
-                       type=float, default=0.8, 
+    parser.add_argument("--train_ratio",
+                       type=float, default=0.8,
                        help="Train/validation split ratio")
-    parser.add_argument("--train_only", 
+    parser.add_argument("--train_only",
                        action="store_true", default=False,
                        help="Use only train split (not validation/test)")
-    
+
     args = parser.parse_args()
- 
+
     os.makedirs(args.output_dir, exist_ok=True)
 
     processor = MedicalDataProcessor(max_answer_length=args.max_answer_length)
-    
+
     if args.dataset == 'all':
         datasets_to_process = ['asclepius', 'clinicalnotes']
     else:
         datasets_to_process = [args.dataset]
-    
+
     for dataset_name in datasets_to_process:
         try:
             print(f"\n{'='*50}")
             print(f"Processing {dataset_name.upper()}")
             print(f"{'='*50}")
-            
+
             qa_pairs = processor.process_dataset(
                 dataset_name,
                 use_all_splits=not args.train_only
             )
-            
+
             print(f"Extracted {len(qa_pairs)} pairs from {dataset_name}")
-            
+
             if not qa_pairs:
                 print(f"No data extracted from {dataset_name}, skipping...")
                 continue
-            
+
             train_dataset, val_dataset = create_formatted_dataset(
-                qa_pairs, 
+                qa_pairs,
                 format_type=args.format,
                 train_split_ratio=args.train_ratio
             )
-            
+
             dataset_output_dir = os.path.join(args.output_dir, dataset_name)
             os.makedirs(dataset_output_dir, exist_ok=True)
-            
+
             train_path = os.path.join(dataset_output_dir, f"train_{args.format}")
             val_path = os.path.join(dataset_output_dir, f"val_{args.format}")
-            
+
             save_dataset(train_dataset, train_path)
             save_dataset(val_dataset, val_path)
 
             sample_size = min(10, len(train_dataset))
             sample_train = train_dataset.select(range(sample_size))
             sample_val = val_dataset.select(range(min(5, len(val_dataset))))
-            
+
             save_jsonl(sample_train, os.path.join(dataset_output_dir, f"sample_train_{args.format}.jsonl"))
             save_jsonl(sample_val, os.path.join(dataset_output_dir, f"sample_val_{args.format}.jsonl"))
 
@@ -267,15 +267,15 @@ def main():
             sample_text = train_dataset[0]['text']
             print(sample_text[:500] + "..." if len(sample_text) > 500 else sample_text)
             print("="*60)
-            
+
             print(f"\n{dataset_name} dataset preparation complete!")
             print(f"Files saved in: {dataset_output_dir}")
-            
+
         except Exception as e:
             print(f"Error processing {dataset_name}: {e}")
             print(f"Skipping {dataset_name}...")
             continue
-    
+
     print(f"\n{'='*50}")
     print("ALL DATASETS PROCESSING COMPLETE!")
     print(f"{'='*50}")
