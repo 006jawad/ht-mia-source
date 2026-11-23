@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environments and local credentials
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+
+# Generated datasets, models, and results
+medical_processed/
+general_processed/
+membership_data/
+models/
+results/
+outputs/
+output_*/
+checkpoint-*/
+wandb/
+runs/
+
+# Model weights and generated artifacts
+*.bin
+*.ckpt
+*.pkl
+*.pt
+*.pth
+*.safetensors
+*.jsonl
+*.log
+

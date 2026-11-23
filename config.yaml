@@ -1,0 +1,77 @@
+# Config for membership inference
+global:
+  target_model: "<PATH_TO_TARGET_MODEL>"  # Update this path
+  datasets:
+    - name: "<PATH_TO_DATASET>"  # Update this path
+      split: "train"
+  batch_size: 16
+  device: "cuda:0"
+  fpr_thresholds:
+    - 0.1
+    - 0.01
+  n_bootstrap_samples: 1000
+
+# Baseline attacks
+loss:
+  module: loss
+
+zlib:
+  module: zlib
+
+lowercase:
+  module: lowercase
+  batch_size: 16
+
+
+minkplusplus:
+  module: minkplusplus
+  k: 20
+  batch_size: 16
+
+
+ratio:
+  module: ratio
+  reference_model_path: "Qwen/Qwen3-0.6B-Base"  # Update this path
+  reference_tokenizer_path: "Qwen/Qwen3-0.6B-Base"  # Update this path
+  batch_size: 16
+  device: "cuda:0"
+
+pac:
+  module: pac
+  k_min: 0.3
+  k_max: 0.05
+  alpha: 0.3
+  num_augmentations: 3
+
+# Comparison with newer MIA methods (see Appendix)
+ez_mia:
+  module: ez_mia
+  reference_model_path: "Qwen/Qwen3-0.6B-Base"  # Update this path
+  reference_tokenizer_path: "Qwen/Qwen3-0.6B-Base"  # Update this path
+  batch_size: 16
+  device: "cuda:0"
+
+wbc:
+  module: wbc
+  reference_model_path: "Qwen/Qwen3-0.6B-Base"  # Update this path
+  reference_tokenizer_path: "Qwen/Qwen3-0.6B-Base"  # Update this path
+  max_length: 512
+  batch_size: 16
+  device: "cuda:0"
+  reference_device: "cuda:1"
+
+# HT-MIA method
+ht_mia:
+  module: ht_mia
+  base_model_name: "Qwen/Qwen3-0.6B-Base" # Update this path
+  base_device: "cuda:1"  
+  min_k: 20 
+  max_k: 30
+  threshold: 0.5
+  max_length: 512
+  batch_size: 16
+
+  return_type: "raw_score"
+
+
+
