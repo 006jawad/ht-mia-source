@@ -161,6 +161,10 @@ python finetune/finetune_qwen_DP.py \
 
 The proceedings citation will replace the preprint citation after the EACL 2027 Anthology entry is available.
 
+## License
+
+This project is released under the [MIT License](LICENSE).
+
 ## Third-party attribution
 
 The WBC comparison is adapted from the MIT-licensed WBC implementation. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for attribution and license terms.
